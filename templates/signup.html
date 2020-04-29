@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %} {{title}} {% endblock title %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3"></div>
+        <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+            <form action="/signup" method="post">
+                <h3>Signup</h3>
+                <fieldset id="add-post">
+                    <div class="form-form">
+                        <input type="text" name="username" class="form-control" placeholder="Enter Username">
+                    </div>
+                    <div class="form-form">
+                        <input type="text" name="first_name" class="form-control" placeholder="Enter First name">
+                    </div>
+                    <div class="form-form">
+                        <input type="text" name="last_name" class="form-control" placeholder="Enter Last name">
+                    </div>
+                    <div class="form-form">
+                        <input type="email" name="email" class="form-control" placeholder="Enter email">
+                    </div>
+                    <div class="form-form">
+                        <input type="password" name="password1" class="form-control" placeholder="Enter Password">
+                    </div>
+                     <div class="form-form">
+                        <input type="password" name="password2" class="form-control" placeholder="Confirm Password">
+                    </div>
+                    <button class="btn btn-info">Create account</button>
+                </fieldset>
+            </form>
+        </div>
+        <div class="col-sm-12 col-md-3 col-lg-3 col-xl-3"></div>
+    </div>
+</div>
+
+{% endblock body %}
