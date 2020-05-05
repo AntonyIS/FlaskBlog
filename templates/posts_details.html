@@ -16,7 +16,8 @@
                     <p class="lead">{{found_post.content}}</p>
                 </div>
                 <div class="col-sm-12 col-md-6 col-lg-6 col-xl-6">
-                    <form action="/posts/update/{{found_post.id}}" method="post" enctype="multipart/form-data">
+                    {% if auth_user %}
+                        <form action="/posts/update/{{found_post.id}}" method="post" enctype="multipart/form-data">
                         <fieldset id="">
                             <div class="form-form">
                                 <input type="text" name="the_title" class="form-control" placeholder="Enter title" value="{{found_post.title}}">
@@ -39,10 +40,13 @@
                             <button class="btn btn-info">Update</button>
                         </fieldset>
                     </form>
+                    {% endif %}
                 </div>
             </div>
              <p>{{found_post.category}}</p>
-            <a href="/posts/delete/{{found_post.id}}" class="btn btn-danger">Delete</a>
+            {% if auth_user %}
+                <a href="/posts/delete/{{found_post.id}}" class="btn btn-danger">Delete</a>
+            {% endif %}
         </div>
     </div>
 </section>

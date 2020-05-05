@@ -1,4 +1,4 @@
-from  flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 import os
@@ -26,7 +26,9 @@ def load_user(id):
     return User.query.get(id)
 #############DB CONF ############
 # db location
+# https://flask-sqlalchemy.palletsprojects.com/en/2.x/config/
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "blog.db")
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/blog.db "windows
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['POST_UPLOAD_FOLDER'] = os.path.join(basedir, 'static/images/posts/')
 app.config['SECRET_KEY'] = 'husdagavafvaafbafbfbaavvuavafvfdbbfafabboavbav'
@@ -84,6 +86,7 @@ def add_post():
 
         # post object
         user_post = Post(
+            user_id = current_user.id,
             title = title,
             category = category,
             content = content.strip(),
@@ -95,6 +98,7 @@ def add_post():
         file.save(os.path.join(app.config['POST_UPLOAD_FOLDER'], filename))
         # save post into the db
         db.session.commit()
+        flash("Post created successfully", "text text-success")
         return redirect('/')
     else:
         #GET request
@@ -104,14 +108,23 @@ def add_post():
 @app.route('/posts/detail/<int:post_id>')
 def post_detail(post_id):
     found_post = Post.query.get(post_id)
-    return render_template("posts_details.html", title = "Blog app | {} Blog".format(found_post.title) , found_post=found_post)
+    try:
+        if found_post.user_id == current_user.id:
+            auth_user = True
+            return render_template("posts_details.html", title = "Blog app | {} Blog".format(found_post.title) ,auth_user=auth_user, found_post=found_post)
+    except:
+        auth_user = False
+        return render_template("posts_details.html", title = "Blog app | {} Blog".format(found_post.title) , auth_user=auth_user,found_post=found_post)
+
+    return render_template("posts_details.html", title="Blog app | {} Blog".format(found_post.title), found_post=found_post)
+
 
 # http://127.0.0.1:5000/posts/delete/100: update
 # /posts/update/{{post.id}}
 @app.route('/posts/update/<int:post_id>', methods =['GET', 'POST'])
 def add_delete(post_id):
     update_post = Post.query.get(post_id)
-    if request.method == 'POST':
+    if request.method == 'POST' and update_post.user_id == current_user.id:
         title = request.form.get('the_title')
         category = request.form.get('category')
         content = request.form.get('description')
@@ -132,9 +145,13 @@ def add_delete(post_id):
 @app.route('/posts/delete/<int:post_id>')
 def post_delete(post_id):
     found_post = Post.query.get(post_id)
-    db.session.delete(found_post)
-    db.session.commit()
-    return redirect('/')
+    if found_post.user_id == current_user.id:
+        db.session.delete(found_post)
+        db.session.commit()
+        return redirect('/')
+    else:
+        return redirect('/')
+
 
 
 ################ USER AUTH ######################
@@ -176,9 +193,12 @@ def register():
                 db.session.add(user_obj)
                 # save user into db
                 db.session.commit()
+                flash("Signup successful", "text text-success")
                 return redirect('/login')
             else:
+                flash("Signup successful", "text text-danger")
                 return redirect('/signup')
+        flash("Signup unsuccessful, password not matching", "text text-danger")
         return redirect('/signup')
 
         # 5.take user to login page
@@ -200,29 +220,30 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user is None:
             # return user login with the right email
+            flash("Login unsuccessfully, wrong email", "text text-danger")
             return  redirect('/login')
         else:
             if check_password_hash(user.password,password ):
                 # return true if user is found with the right password
                 login_user(user)
+                flash("Login success", "text text-success")
                 return redirect('/account')
             else:
                 # return false if user is found with the right password
+                flash("Login unsuccessfully, check password", "text text-danger")
                 return  redirect('/login')
 
 
 # http://127.0.0.1:5000/account
 @app.route('/account')
 def account():
-
     return render_template("account.html",title = "Blog app | account page")
 
 # http://127.0.0.1:5000/logout
 @app.route('/logout')
 def logout():
-    user = current_user
     logout_user()
-    return render_template("index.html",title = "Blog app | Home page")
+    return redirect('/')
 
 
 # Error handlers routes

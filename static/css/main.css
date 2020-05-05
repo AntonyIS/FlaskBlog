@@ -3,7 +3,9 @@ body{
     padding:0;
     font-family:sans-serif;
 }
-
+form{
+    text-align: center;
+}
 #add-post, fieldset{
     border: 1px #555555 solid;
     padding:10px;
@@ -12,7 +14,8 @@ body{
 }
 #add-post input[type='text'], input[type='password'], input[type='email']{
     border-radius: 20px;
-    margin:3px;
+    margin-top:10px;
+    margin-bottom: 10px
 }
 #add-post textarea{
     border-radius: 20px;
